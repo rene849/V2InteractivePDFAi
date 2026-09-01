@@ -15,7 +15,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
-/* Root Page & Body Reset — Auto height eliminates nested scrollbars */
+/* Root Page & Body Reset */
 html, body{
   width: 100%;
   height: auto;
@@ -27,7 +27,6 @@ html, body{
   -webkit-font-smoothing: antialiased;
 }
 
-/* Enable Container Queries for responsive scaling inside Moodle */
 body {
   container-type: inline-size;
   container-name: app-container;
@@ -642,6 +641,8 @@ const EVENTS = [
 /* Visited tracker for nodes */
 const visited = new Set();
 let activeId = null;
+let lastSentHeight = 0;
+let lastContainerWidth = 0;
 
 /* ── DOM Injection Helpers ── */
 function fillLogos(){
@@ -863,15 +864,18 @@ function resetAll(){
   showScreen('cover');
 }
 
-/* ── PostMessage Height Communication for Moodle ── */
+/* ── Fixed PostMessage Resizer (Prevents Infinite Resize Loop) ── */
 function notifyMoodleHeight() {
   const activeScreen = document.querySelector('.screen.is-active');
   if (!activeScreen) return;
 
-  // Measure content scroll height cleanly
-  const height = Math.ceil(activeScreen.scrollHeight);
+  // Measure bounded client height instead of infinite scrollHeight
+  const height = Math.ceil(activeScreen.getBoundingClientRect().height);
 
-  // Post height payload to Moodle footer listener
+  // Prevent posting if height hasn't meaningfully changed (ignores Moodle's +20px buffer)
+  if (Math.abs(height - lastSentHeight) < 5) return;
+  lastSentHeight = height;
+
   window.parent.postMessage({
     type: 'resize',
     app: 'ce-interactive',
@@ -883,12 +887,20 @@ function notifyMoodleHeight() {
 function setupResizeObserver() {
   const ro = new ResizeObserver(entries => {
     for (let entry of entries) {
-      const width = entry.contentRect.width;
+      const width = Math.ceil(entry.contentRect.width);
 
-      if (width > 520 && activeId && document.getElementById('intro').classList.contains('is-active')) {
-        goToEvent(activeId);
+      // Only act when container width actually shifts
+      if (Math.abs(width - lastContainerWidth) > 5) {
+        lastContainerWidth = width;
+
+        if (width > 520 && activeId && document.getElementById('intro').classList.contains('is-active')) {
+          goToEvent(activeId);
+        }
+        
+        // Reset sent height cache on width resize to force recalculation
+        lastSentHeight = 0;
+        notifyMoodleHeight();
       }
-      notifyMoodleHeight();
     }
   });
 
