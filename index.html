@@ -42,16 +42,18 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 .acc-row:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
 
 /* ── Screen switching ── */
+/* Hidden screens use display:none so they contribute ZERO height to
+   document.body.scrollHeight — only the active screen is measured.
+   This is what stops the iframe from growing/shrinking incorrectly. */
 .screen{
   display: none;
   flex-direction: column;
   position: relative;
   width: 100%;
-  height: auto;
-  opacity: 0;
-  transition: opacity 0.25s ease-in-out;
 }
-.screen.is-active{display:flex;opacity:1;}
+.screen.is-active{
+  display: flex;
+}
 
 /* ── APPBAR ── */
 .appbar{
@@ -698,15 +700,10 @@ function showScreen(id){
     }, 150);
   }
 
-  // Tell the Moodle parent page to scroll to the top of our iframe.
-  // We send type:'scrollToTop' for custom handlers, and also a standard
-  // scroll message. The Moodle script needs to handle this — see instructions.
-  window.parent.postMessage({ type: 'scrollToTop', app: 'ce-interactive' }, '*');
-
-  // Scroll our own document to top too (covers the case where we're viewed directly)
+  // Scroll our own document to top (so iframe content starts from the top)
   window.scrollTo(0, 0);
 
-  // Notify Moodle of the new height after paint
+  // Report new height to Moodle after the new screen has painted
   notifyMoodleHeight();
 }
 
@@ -873,44 +870,47 @@ function resetAll(){
 }
 
 /* ── PostMessage Height Communication for Moodle ── */
+// All hidden .screen elements use display:none (zero height).
+// So document.body.scrollHeight == height of the ONE active screen.
+// We use double-rAF so the browser has finished painting before we measure.
+var _heightTimer = null;
 function notifyMoodleHeight() {
-  // Double rAF ensures display:flex has been applied AND the browser has
-  // painted before we measure — prevents reporting stale / zero heights.
-  requestAnimationFrame(function() {
+  clearTimeout(_heightTimer);
+  _heightTimer = setTimeout(function() {
     requestAnimationFrame(function() {
-      const activeScreen = document.querySelector('.screen.is-active');
-      if (!activeScreen) return;
-
-      // Measure the active screen's own rendered height (not document body,
-      // which would include all hidden .screen siblings collapsed to 0).
-      const height = Math.ceil(activeScreen.getBoundingClientRect().height);
-
-      window.parent.postMessage({
-        type: 'resize',
-        app: 'ce-interactive',
-        height: height
-      }, '*');
+      requestAnimationFrame(function() {
+        var h = Math.ceil(document.body.scrollHeight);
+        if (h < 200) return; // ignore spurious zero/tiny reads during transition
+        window.parent.postMessage({
+          type: 'resize',
+          app: 'ce-interactive',
+          height: h
+        }, '*');
+      });
     });
-  });
+  }, 50); // 50ms settle — long enough for display:flex to apply, short enough to feel instant
 }
 
 /* ── Observer for Container and Sidebar Resizing ── */
+// ResizeObserver on body catches Moodle sidebar open/close which narrows
+// the iframe without firing a window 'resize' event in all browsers.
 function setupResizeObserver() {
-  let resizeTimer = null;
-
+  if (!window.ResizeObserver) return;
+  var lastWidth = 0;
   const ro = new ResizeObserver(entries => {
-    for (let entry of entries) {
-      const width = entry.contentRect.width;
-      if (width > 520 && activeId && document.getElementById('intro').classList.contains('is-active')) {
-        goToEvent(activeId);
-      }
+    const width = entries[0] ? entries[0].contentRect.width : 0;
+    // Switch intro→event if now wide enough and an event is active
+    if (width > 520 && width !== lastWidth && activeId && document.getElementById('intro').classList.contains('is-active')) {
+      goToEvent(activeId);
     }
-    // Debounce: only report height once the resize settles (150 ms)
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(notifyMoodleHeight, 150);
+    lastWidth = width;
+    // notifyMoodleHeight is already debounced internally
+    notifyMoodleHeight();
   });
-
   ro.observe(document.body);
+
+  // Also listen for plain window resize (catches zoom changes etc.)
+  window.addEventListener('resize', notifyMoodleHeight, {passive: true});
 }
 
 /* ── Modal Controls ── */
