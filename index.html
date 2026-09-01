@@ -868,8 +868,8 @@ function notifyMoodleHeight() {
   const activeScreen = document.querySelector('.screen.is-active');
   if (!activeScreen) return;
 
-  // Use bounding box height to prevent continuous height accumulation loops
-  const height = Math.ceil(activeScreen.getBoundingClientRect().height);
+  // Measure content scroll height cleanly
+  const height = Math.ceil(activeScreen.scrollHeight);
 
   // Post height payload to Moodle footer listener
   window.parent.postMessage({
@@ -881,21 +881,14 @@ function notifyMoodleHeight() {
 
 /* ── Observer for Container and Sidebar Resizing ── */
 function setupResizeObserver() {
-  let lastWidth = 0;
-
   const ro = new ResizeObserver(entries => {
     for (let entry of entries) {
       const width = entry.contentRect.width;
 
-      // Only notify Moodle if the container width changes to break infinite height loops
-      if (width !== lastWidth) {
-        lastWidth = width;
-
-        if (width > 520 && activeId && document.getElementById('intro').classList.contains('is-active')) {
-          goToEvent(activeId);
-        }
-        notifyMoodleHeight();
+      if (width > 520 && activeId && document.getElementById('intro').classList.contains('is-active')) {
+        goToEvent(activeId);
       }
+      notifyMoodleHeight();
     }
   });
 
