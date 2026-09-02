@@ -14,7 +14,7 @@
   --maxw:1320px;
   /* Fixed app height — tall enough for the longest event.
      This stops the iframe jumping when switching events. */
-  --app-height: 680px;
+  --app-height: 740px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -101,14 +101,14 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 /* ── WORK AREA ── */
 .work-outer{width:100%;flex:1;display:flex;flex-direction:column;}
 .work-inner{max-width:var(--maxw);width:100%;margin:0 auto;flex:1;
-  padding:clamp(6px,1.2cqw,16px) clamp(18px,3cqw,40px) 0;
+  padding:clamp(6px,1.2cqw,14px) clamp(16px,2.5cqw,36px) 0;
   display:flex;flex-direction:column;}
 
 /* ── INTRO ── */
 .intro-body{position:relative;display:flex;align-items:center;min-height:clamp(180px,24cqw,260px);}
 .intro-copy{position:relative;z-index:2;max-width:clamp(260px,44cqw,480px);}
 /* 16px matches typical Moodle body text */
-.intro-copy p{font-size:16px;line-height:1.65;color:var(--ink);font-weight:400;margin-bottom:10px;}
+.intro-copy p{font-size:15px;line-height:1.6;color:var(--ink);font-weight:400;margin-bottom:10px;}
 .intro-copy p:last-child{margin-bottom:0;}
 .intro-bg{position:absolute;left:0;right:0;top:clamp(6px,1.5cqw,18px);width:100%;aspect-ratio:1200/348;z-index:0;pointer-events:none;}
 .intro-bg svg{width:100%;height:100%;display:block;overflow:visible;}
@@ -120,25 +120,35 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 /* ── EVENT columns ── */
 .work-body{
   display:grid;
-  grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
-  gap:clamp(14px,2.5cqw,32px);
+  grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
+  gap:clamp(12px,2cqw,28px);
   align-items:start;
-  padding:clamp(8px,1.5cqw,20px) 0;
+  padding:clamp(6px,1cqw,14px) 0;
+  flex:1;
 }
-.ev-text{display:flex;flex-direction:column;}
+.ev-text{display:flex;flex-direction:column;min-height:0;}
 .ev-head{display:flex;align-items:baseline;gap:clamp(6px,1cqw,14px);flex-wrap:wrap;margin-bottom:4px;}
-.ev-year{font-size:clamp(28px,3.5cqw,44px);font-weight:800;color:var(--red);letter-spacing:-.02em;line-height:1;flex:none;}
-.ev-title{font-size:clamp(16px,1.5cqw,20px);font-weight:800;letter-spacing:-.015em;line-height:1.2;color:var(--ink);}
-.ev-rule{height:1px;background:var(--rule);margin:clamp(8px,1cqw,12px) 0;}
-/* 16px body text matches Moodle page body */
-.ev-desc{font-size:16px;line-height:1.65;color:var(--ink);}
+.ev-year{font-size:clamp(26px,3.2cqw,42px);font-weight:800;color:var(--red);letter-spacing:-.02em;line-height:1;flex:none;}
+.ev-title{font-size:clamp(15px,1.4cqw,19px);font-weight:800;letter-spacing:-.015em;line-height:1.2;color:var(--ink);}
+.ev-rule{height:1px;background:var(--rule);margin:clamp(6px,0.8cqw,10px) 0;}
+/* Scrollable text area for long events — keeps layout stable */
+.ev-desc-wrap{
+  overflow-y:auto;
+  max-height:clamp(200px,36cqh,380px);
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--rule) transparent;
+}
+.ev-desc-wrap::-webkit-scrollbar{width:4px;}
+.ev-desc-wrap::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px;}
+.ev-desc{font-size:15px;line-height:1.65;color:var(--ink);}
 
-.ev-illo{display:flex;justify-content:center;align-items:center;padding-top:clamp(4px,1cqw,12px);}
-.ev-illo-inner{width:100%;max-width:clamp(160px,22cqw,280px);max-height:clamp(160px,22cqw,280px);aspect-ratio:1/1;display:grid;place-items:center;}
+.ev-illo{display:flex;justify-content:center;align-items:flex-start;padding-top:clamp(4px,1cqw,12px);}
+.ev-illo-inner{width:100%;max-width:clamp(140px,20cqw,260px);max-height:clamp(140px,20cqw,260px);aspect-ratio:1/1;display:grid;place-items:center;}
 .ev-illo-inner svg,.ev-illo-inner img{width:100%;height:100%;max-height:100%;display:block;object-fit:contain;}
 
 /* ── TIMELINE STRIP ── */
-.tl-wrap{padding:clamp(10px,1.2cqw,16px) 0;flex:0 0 auto;background:#fff;margin-top:auto;}
+.tl-wrap{padding:clamp(6px,1cqw,12px) 0 clamp(8px,1cqw,12px);flex:0 0 auto;background:#fff;margin-top:auto;}
 .tl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tl-scroll::-webkit-scrollbar{display:none;}
 .tl-track{display:flex;align-items:center;padding:4px clamp(12px,2cqw,24px);min-width:max-content;}
@@ -14929,6 +14939,15 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
   <div class="appbar">
     <div class="appbar-inner">
       <div class="appbar-logo" id="logo-cover"></div>
+      <div class="appbar-divider"></div>
+      <div class="appbar-title">The lead-up to the US-China rivalry</div>
+      <div class="appbar-tools">
+        <button class="icon-btn btn-bib-trigger" aria-label="Bibliography" title="Bibliography">
+          <span class="ic ic-rest"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="17" fill="#FFF" stroke="#2E45B8" stroke-width="2"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#2E45B8" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#2E45B8" stroke-width="2"/></svg></span>
+          <span class="ic ic-over"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#2E45B8"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#FFF" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#FFF" stroke-width="2"/></svg></span>
+          <span class="ic ic-pressed"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#141F52"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#FFF" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#FFF" stroke-width="2"/></svg></span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -15064,7 +15083,7 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
             <span class="ev-title" id="ev-title">Establishment of the People’s Republic of China</span>
           </div>
           <div class="ev-rule"></div>
-          <div class="ev-desc" id="ev-desc"></div>
+          <div class="ev-desc-wrap"><div class="ev-desc" id="ev-desc"></div></div>
         </div>
 
         <div class="ev-illo">
