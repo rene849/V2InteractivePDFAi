@@ -14,7 +14,7 @@
   --maxw:1320px;
   /* vh-based height: fills the viewport minus Moodle chrome.
      Adjust this if the Moodle page header height changes.   */
-  --app-height: 100vh;
+  --app-height: 680px;  /* Fixed pixel height - stable in all contexts */
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -38,8 +38,9 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 .screen{
   display:none;flex-direction:column;
   position:relative;width:100%;
-  min-height:var(--app-height);  /* Changed from height to min-height for Moodle */
-  overflow:visible;  /* Changed from hidden to visible for content flow */
+  height:var(--app-height);  /* Fixed height - stable in Moodle */
+  overflow-y:auto;  /* Scroll internally if needed, don't expand */
+  overflow-x:hidden;
 }
 .screen.is-active{display:flex;}
 
@@ -15441,12 +15442,10 @@ var _heightTimer = null;
 function notifyMoodleHeight() {
   clearTimeout(_heightTimer);
   _heightTimer = setTimeout(function() {
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        var h = Math.max(document.body.scrollHeight, 680);
-        window.parent.postMessage({ type:'resize', app:'ce-interactive', height:h }, '*');
-      });
-    });
+    // Send stable fixed height to prevent cascading reflows in Moodle
+    // Always send same value regardless of content (no scrollHeight calculation)
+    var stableHeight = 750;  // Fixed value - stable in all contexts
+    window.parent.postMessage({ type:'resize', app:'ce-interactive', height:stableHeight }, '*');
   }, 80);
 }
 
