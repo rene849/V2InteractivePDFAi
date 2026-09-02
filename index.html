@@ -12,9 +12,9 @@
   --blue:#2E45B8; --teal:#36E2BD; --cream:#EBE9E0;
   --ink:#0f172a; --muted:#5a5f73; --rule:#d7d9e0;
   --maxw:1320px;
-  /* Fixed app height — tall enough for the longest event.
-     This stops the iframe jumping when switching events. */
-  --app-height: 740px;
+  /* vh-based height: fills the viewport minus Moodle chrome.
+     Adjust this if the Moodle page header height changes.   */
+  --app-height: 100vh;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -38,7 +38,9 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 .screen{
   display:none;flex-direction:column;
   position:relative;width:100%;
-  min-height:var(--app-height);
+  /* Each screen fills exactly one viewport height — no scroll, no jump */
+  height:var(--app-height);
+  overflow:hidden;
 }
 .screen.is-active{display:flex;}
 
@@ -65,7 +67,6 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
   position:relative;width:100%;max-width:var(--maxw);margin:0 auto;
   flex:1;display:flex;align-items:center;
   padding:clamp(16px,2.5cqw,32px) clamp(18px,4cqw,48px);
-  min-height:calc(var(--app-height) - 52px);
 }
 .cover-text{position:relative;z-index:5;max-width:clamp(280px,45cqw,520px);}
 .cover-title{font-size:clamp(26px,3.8cqw,44px);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin-bottom:clamp(16px,2cqw,28px);}
@@ -99,8 +100,8 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 .thumb.show{animation:floaty 5s ease-in-out infinite;}
 
 /* ── WORK AREA ── */
-.work-outer{width:100%;flex:1;display:flex;flex-direction:column;}
-.work-inner{max-width:var(--maxw);width:100%;margin:0 auto;flex:1;
+.work-outer{width:100%;flex:1;min-height:0;display:flex;flex-direction:column;}
+.work-inner{max-width:var(--maxw);width:100%;margin:0 auto;flex:1;min-height:0;
   padding:clamp(6px,1.2cqw,14px) clamp(16px,2.5cqw,36px) 0;
   display:flex;flex-direction:column;}
 
@@ -120,52 +121,54 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 /* ── EVENT columns ── */
 .work-body{
   display:grid;
-  grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
-  gap:clamp(12px,2cqw,28px);
+  grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);
+  gap:clamp(12px,2cqw,32px);
   align-items:start;
-  padding:clamp(6px,1cqw,14px) 0;
+  padding:clamp(8px,1.2cqw,16px) 0 0;
   flex:1;
+  min-height:0;
 }
-.ev-text{display:flex;flex-direction:column;min-height:0;}
-.ev-head{display:flex;align-items:baseline;gap:clamp(6px,1cqw,14px);flex-wrap:wrap;margin-bottom:4px;}
+.ev-text{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.ev-head{display:flex;align-items:baseline;gap:clamp(6px,1cqw,14px);flex-wrap:wrap;margin-bottom:2px;}
 .ev-year{font-size:clamp(26px,3.2cqw,42px);font-weight:800;color:var(--red);letter-spacing:-.02em;line-height:1;flex:none;}
-.ev-title{font-size:clamp(15px,1.4cqw,19px);font-weight:800;letter-spacing:-.015em;line-height:1.2;color:var(--ink);}
-.ev-rule{height:1px;background:var(--rule);margin:clamp(6px,0.8cqw,10px) 0;}
-/* Scrollable text area for long events — keeps layout stable */
+.ev-title{font-size:clamp(14px,1.35cqw,18px);font-weight:800;letter-spacing:-.015em;line-height:1.2;color:var(--ink);}
+.ev-rule{height:1px;background:var(--rule);margin:clamp(5px,0.7cqw,9px) 0;}
+/* Scrollable only when text exceeds available height */
 .ev-desc-wrap{
   overflow-y:auto;
-  max-height:clamp(200px,36cqh,380px);
+  flex:1;
+  min-height:0;
   padding-right:4px;
   scrollbar-width:thin;
   scrollbar-color:var(--rule) transparent;
 }
 .ev-desc-wrap::-webkit-scrollbar{width:4px;}
 .ev-desc-wrap::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px;}
-.ev-desc{font-size:15px;line-height:1.65;color:var(--ink);}
+.ev-desc{font-size:clamp(13px,1.1cqw,15px);line-height:1.6;color:var(--ink);}
 
-.ev-illo{display:flex;justify-content:center;align-items:flex-start;padding-top:clamp(4px,1cqw,12px);}
+.ev-illo{display:flex;justify-content:center;align-items:center;padding-top:clamp(4px,1cqw,12px);}
 .ev-illo-inner{width:100%;max-width:clamp(140px,20cqw,260px);max-height:clamp(140px,20cqw,260px);aspect-ratio:1/1;display:grid;place-items:center;}
 .ev-illo-inner svg,.ev-illo-inner img{width:100%;height:100%;max-height:100%;display:block;object-fit:contain;}
 
 /* ── TIMELINE STRIP ── */
-.tl-wrap{padding:clamp(6px,1cqw,12px) 0 clamp(8px,1cqw,12px);flex:0 0 auto;background:#fff;margin-top:auto;}
+.tl-wrap{padding:clamp(8px,1cqw,14px) 0 clamp(8px,1cqw,14px);flex:0 0 auto;background:#fff;margin-top:auto;}
 .tl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tl-scroll::-webkit-scrollbar{display:none;}
-.tl-track{display:flex;align-items:center;padding:4px clamp(12px,2cqw,24px);min-width:max-content;}
-/* align-self:center keeps connector exactly at circle midpoints */
-.tl-conn{flex:1;min-width:clamp(4px,0.8cqw,12px);height:2px;background:rgba(31,46,122,.25);align-self:center;}
-.tl-node{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;}
+/* align-items:center is the key — connector height:2px centred with circle */
+.tl-track{display:flex;align-items:center;padding:2px clamp(8px,1.5cqw,20px);min-width:max-content;}
+.tl-conn{flex:1;min-width:clamp(4px,0.7cqw,10px);height:2px;background:rgba(31,46,122,.22);flex-shrink:0;}
+.tl-node{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .tl-btn{
-  width:32px;height:32px;flex:none;
+  width:30px;height:30px;flex:none;
   border-radius:50%;border:1.5px solid var(--blue);background:#fff;
-  color:var(--blue);font-weight:700;font-size:11px;
+  color:var(--blue);font-weight:700;font-size:10.5px;
   display:grid;place-items:center;cursor:pointer;
   transition:background .2s,color .2s,box-shadow .2s,transform .18s;
 }
 .tl-btn:hover{background:var(--blue);color:#fff;transform:translateY(-2px);}
 .tl-btn.visited{background:#eef0fb;color:var(--navy);}
 .tl-btn.active{background:var(--navy-deep)!important;color:#fff!important;border-color:var(--navy-deep);box-shadow:0 0 0 2.5px var(--teal),0 2px 8px rgba(20,31,82,.25);transform:scale(1.08);}
-.tl-year{font-size:10px;font-weight:700;line-height:1.2;color:var(--ink);white-space:nowrap;}
+.tl-year{font-size:9.5px;font-weight:700;line-height:1.2;color:var(--ink);white-space:nowrap;}
 .tl-label{display:none;}
 .tl-node-text{display:flex;flex-direction:column;align-items:center;}
 
@@ -213,9 +216,9 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
   .btn-start{width:100%;max-width:none;height:42px;font-size:16px;order:3;}
   .cover-text::after{content:'';display:block;height:1px;background:var(--rule);margin-top:16px;order:4;}
 
-  .intro-body{min-height:auto;padding:2px 0 6px;display:block;}
+  .intro-body{min-height:auto;padding:2px 0 8px;display:flex;flex-direction:column;}
   .intro-bg{display:none;}
-  .intro-copy{max-width:none;}
+  .intro-copy{max-width:none;margin-bottom:12px;}
   .intro-copy p{font-size:15px;line-height:1.55;margin-bottom:8px;}
 
   .tl-wrap{display:none !important;}
@@ -227,22 +230,32 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 
   .acc-row{
     width:100%;display:flex;align-items:center;gap:12px;
-    padding:10px 0;text-align:left;background:none;border:none;
+    padding:8px 0;text-align:left;background:none;border:none;
     cursor:pointer;position:relative;
   }
-  /* Vertical connector line — offset 15px = half of 32px circle - 1px line */
-  .acc-row::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:2px;background:rgba(31,46,122,.2);z-index:0;}
-  .acc-item:first-child .acc-row::before{top:16px;}
-  .acc-item:last-child  .acc-row::before{bottom:calc(100% - 16px);}
+  /* Vertical connector: positioned behind the 32px circle centre (16px from left) */
+  .acc-row::before{
+    content:'';position:absolute;
+    left:15px;        /* (32px circle / 2) - (2px line / 2) = 15px */
+    top:0;bottom:0;width:2px;
+    background:rgba(31,46,122,.2);z-index:0;
+  }
+  .acc-item:first-child .acc-row::before{top:50%;}
+  .acc-item:last-child  .acc-row::before{bottom:50%;}
 
-  /* Number circle */
-  .acc-numwrap{position:relative;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;z-index:1;}
+  /* Number circle — centred exactly on the connector line */
+  .acc-numwrap{
+    position:relative;flex:none;
+    width:32px;height:32px;
+    display:grid;place-items:center;
+    z-index:1;
+  }
   .acc-num{
     width:32px;height:32px;border-radius:50%;
     border:1.5px solid var(--blue);background:#fff;color:var(--blue);
     font-weight:700;font-size:12px;
     display:grid;place-items:center;
-    flex:none;position:relative;z-index:1;
+    position:relative;z-index:2;
   }
   .acc-meta{display:flex;flex-direction:column;gap:2px;}
   .acc-year{font-size:13px;font-weight:700;color:var(--ink);}
@@ -14939,15 +14952,6 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
   <div class="appbar">
     <div class="appbar-inner">
       <div class="appbar-logo" id="logo-cover"></div>
-      <div class="appbar-divider"></div>
-      <div class="appbar-title">The lead-up to the US-China rivalry</div>
-      <div class="appbar-tools">
-        <button class="icon-btn btn-bib-trigger" aria-label="Bibliography" title="Bibliography">
-          <span class="ic ic-rest"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="17" fill="#FFF" stroke="#2E45B8" stroke-width="2"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#2E45B8" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#2E45B8" stroke-width="2"/></svg></span>
-          <span class="ic ic-over"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#2E45B8"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#FFF" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#FFF" stroke-width="2"/></svg></span>
-          <span class="ic ic-pressed"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#141F52"/><path d="M11 25.5A2.5 2.5 0 0 1 13.5 23H25" stroke="#FFF" stroke-width="2" fill="none"/><path d="M13.5 10H25v18H13.5A2.5 2.5 0 0 1 11 25.5v-13A2.5 2.5 0 0 1 13.5 10z" fill="none" stroke="#FFF" stroke-width="2"/></svg></span>
-        </button>
-      </div>
     </div>
   </div>
 
