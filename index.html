@@ -38,9 +38,8 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
 .screen{
   display:none;flex-direction:column;
   position:relative;width:100%;
-  /* Each screen fills exactly one viewport height — no scroll, no jump */
-  height:var(--app-height);
-  overflow:hidden;
+  min-height:var(--app-height);  /* Changed from height to min-height for Moodle */
+  overflow:visible;  /* Changed from hidden to visible for content flow */
 }
 .screen.is-active{display:flex;}
 
@@ -221,7 +220,11 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
   .intro-copy{max-width:none;margin-bottom:12px;}
   .intro-copy p{font-size:15px;line-height:1.55;margin-bottom:8px;}
 
+  /* Hide the desktop horizontal timeline on mobile; accordion replaces it */
   .tl-wrap{display:none !important;}
+  
+  /* Show the accordion timeline on mobile */
+  .acc{display:block !important;}
   .work-body{display:none;}
 
   /* ── MOBILE ACCORDION ── */
